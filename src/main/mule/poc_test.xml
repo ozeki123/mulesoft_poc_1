@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<file:config name="File_Config" doc:name="File Config" doc:id="ee2c8860-1ed5-4877-9a18-3141e4bc3cff" >
+		<file:connection workingDir="C:\sample_directory\input" />
+	</file:config>
+	<file:config name="File_Config1" doc:name="File Config" doc:id="d4a7390b-9067-4a84-9f31-fceb3ea05f43" >
+		<file:connection workingDir="C:\sample_directory\input" />
+	</file:config>
+	<file:config name="File_Config2" doc:name="File Config" doc:id="df021a7d-c634-456d-885b-55d2531ed4b7" >
+		<file:connection workingDir="C:\sample_directory\input" />
+	</file:config>
+	<file:config name="File_Config3" doc:name="File Config" doc:id="4da23591-8e2b-418f-8cbb-1cd4d887465f" >
+		<file:connection workingDir="C:\sample_directory\input" />
+	</file:config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="845f610f-0b78-466d-8e61-9bc29b23331a" >
+		<db:generic-connection url="jdbc:postgresql://localhost:5432/" driverClassName="org.postgresql.Driver" user="postgres" password="859435037" />
+	</db:config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="b3718a5e-8a22-4209-901a-faa6eff6c070" >
+		<http:listener-connection host="0.0.0.0" port="8082" />
+	</http:listener-config>
+	<db:config name="Database_Config1" doc:name="Database Config" doc:id="6ec23d35-1494-4644-b802-879c78c36e8e" >
+		<db:generic-connection url="jdbc:postgresql://localhost:5432/" driverClassName="org.postgresql.Driver" user="postgres" password="859435037" />
+	</db:config>
+	<flow name="poc_testFlow" doc:id="1236e99a-8d81-4c66-9207-7ddd887c9448" >
+		<scheduler doc:name="Scheduler" doc:id="4cba1b41-c4e3-4516-a67e-dd1ef7de128b" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="1" timeUnit="MINUTES"/>
+			</scheduling-strategy>
+		</scheduler>
+		<file:read doc:name="Read" doc:id="2b73b230-7b55-4f35-a986-61f1f2221a57" config-ref="File_Config3" path="C:\Users\Andrew Ozeki\Desktop\poc_data_final.csv"/>
+		<ee:transform doc:name="Transform Message" doc:id="3141baf1-006a-4c22-add6-e5766be36c77">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map{
+	LAST_NAME: $.LAST_NAME,
+	FIRST_NAME: $.FIRST_NAME,
+	GENDER: $.GENDER,
+	DOB: $.DOB,
+	ZIP: $.ZIP,
+	ADDRESS: $.ADDRESS	
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:bulk-insert doc:name="Bulk insert" doc:id="f216ded6-7d0a-4cd1-b7de-ec3caed3727d" config-ref="Database_Config">
+			<db:sql ><![CDATA[insert into customer_data(LAST_NAME, FIRST_NAME, GENDER, DOB, ZIP, ADDRESS) values(:LAST_NAME, :FIRST_NAME, :GENDER, :DOB, :ZIP, :ADDRESS)]]></db:sql>
+		</db:bulk-insert>
+		<logger level="INFO" doc:name="Logger" doc:id="17216c01-5e08-446a-8f37-da4923908c81" message="#[payload]"/>
+	</flow>
+	<flow name="poc_testFlow1" doc:id="b2090402-c7a1-430d-86b2-65b40fb89d87" >
+		<http:listener doc:name="Listener" doc:id="40075593-1633-4c2a-8980-aa04422c578f" config-ref="HTTP_Listener_config" path="/customers"/>
+		<db:select doc:name="Select" doc:id="1eebd6ac-75f1-415d-b073-f953172d5d12" config-ref="Database_Config1">
+			<db:sql ><![CDATA[select * from customer_data;]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="bf50f938-592b-47d0-b511-1699c8cde513" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	last_name: payload01.last_name default "",
+	first_name: payload01.first_name default "",
+	gender: payload01.gender default "",
+	dob: payload01.dob default "",
+	zip: payload01.zip default 0,
+	address: payload01.address default ""
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
