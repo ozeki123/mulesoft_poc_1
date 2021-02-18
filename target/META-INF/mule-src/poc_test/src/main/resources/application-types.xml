@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="inputCSV" format="csv">
+      <types:shape format="weave" example="examples/poc_data_final-1.csv"><![CDATA[%dw 2.0
+
+type inputCSV = Array<{|  "﻿LAST_NAME": String,   FIRST_NAME: String,   GENDER: String,   DOB: String,   ZIP: Number,   ADDRESS: String|}> {"isQuotedString": "false",
+"header": "true",
+"headerLineNumber": "0"}
+
+]]></types:shape>
+      <types:properties>
+        <types:property name="headerLineNumber" value="0"/>
+        <types:property name="header" value="true"/>
+        <types:property name="isQuotedString" value="false"/>
+      </types:properties>
+    </types:type>
+    <types:type name="outputCSV" format="json">
+      <types:shape format="weave" example="examples/sample_data-1.json"><![CDATA[%dw 2.0
+
+type outputCSV = Array<{|  LAST_NAME: String,   FIRST_NAME: String,   GENDER: String,   DOB: String,   ZIP: Number {"typeId": "int"},   ADDRESS: String|}> {"example": "[{\\\"LAST_NAME\\\":\\\"Kitajima\\\",\\\"FIRST_NAME\\\":\\\"Yuko\\\",\\\"GENDER\\\":\\\"Female\\\",\\\"DOB\\\":\\\"7\\/3\\/1956\\\",\\\"ZIP\\\":6330206,\\\"ADDRESS\\\":\\\"Nara-ken Uda-shi Haibara Tenmadainishi 4-15-6\\\"},{\\\"LAST_NAME\\\":\\\"Kitajima\\\",\\\"FIRST_NAME\\\":\\\"Yuko\\\",\\\"GENDER\\\":\\\"Female\\\",\\\"DOB\\\":\\\"7\\/3\\/1956\\\",\\\"ZIP\\\":6330206,\\\"ADDRESS\\\":\\\"Nara-ken Uda-shi Haibara Tenmadainishi 4-15-6\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="outputJSON" format="json">
+      <types:shape format="weave" example="examples/sample_output_json.json"><![CDATA[%dw 2.0
+
+type outputJSON = Array<{|  last_name: String,   first_name: String,   gender: String,   dob: String,   zip: Number {"typeId": "int"},   address: String|}> {"example": "[{\\\"last_name\\\":\\\"Kitajima\\\",\\\"first_name\\\":\\\"Yuko\\\",\\\"gender\\\":\\\"Female\\\",\\\"dob\\\":\\\"7\\/3\\/1956\\\",\\\"zip\\\":6330206,\\\"address\\\":\\\"Nara-ken Uda-shi Haibara Tenmadainishi 4-15-6\\\"},{\\\"last_name\\\":\\\"Kitajima\\\",\\\"first_name\\\":\\\"Yuko\\\",\\\"gender\\\":\\\"Female\\\",\\\"dob\\\":\\\"7\\/3\\/1956\\\",\\\"zip\\\":6330206,\\\"address\\\":\\\"Nara-ken Uda-shi Haibara Tenmadainishi 4-15-6\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#3141baf1-006a-4c22-add6-e5766be36c77">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="inputCSV"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="outputCSV"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#bf50f938-592b-47d0-b511-1699c8cde513">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="outputJSON"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

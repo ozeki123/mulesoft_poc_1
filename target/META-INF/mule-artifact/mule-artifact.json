@@ -1,0 +1,30 @@
+{
+  "configs": [
+    "poc_test.xml"
+  ],
+  "secureProperties": [],
+  "redeploymentEnabled": true,
+  "name": "com.mycompany:poc_test:1.0.0-SNAPSHOT",
+  "minMuleVersion": "4.3.0",
+  "requiredProduct": "MULE_EE",
+  "classLoaderModelLoaderDescriptor": {
+    "id": "mule",
+    "attributes": {
+      "exportedPackages": [],
+      "exportedResources": [
+        "application-types.xml",
+        "examples/poc_data_final-1.csv",
+        "examples/poc_data_final.csv",
+        "examples/sample_data-1.json",
+        "examples/sample_data.json",
+        "examples/sample_output_json.json",
+        "log4j2.xml",
+        "poc_test.xml"
+      ]
+    }
+  },
+  "bundleDescriptorLoader": {
+    "id": "mule",
+    "attributes": {}
+  }
+}
